@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#eceef7" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#05060d" />
+    <meta
+      name="description"
+      content="用无限画布想用例，用结构化表格管用例。画布与表格共用同一份数据。"
+    />
+    <title>endless_testcase · 无限画布用例设计</title>
+    <script>
+      // 首帧前定主题，避免深色用户看到白闪
+      try {
+        var t = localStorage.getItem('et:theme')
+        if (t !== 'light' && t !== 'dark') t = 'dark'
+        document.documentElement.dataset.theme = t
+        document.documentElement.style.colorScheme = t
+        document.documentElement.style.background = t === 'dark' ? '#05060d' : '#eceef7'
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
