@@ -4,6 +4,8 @@
 
 一个单机运行的测试用例编写平台：画布负责发散与推演，表格负责规范与交付，两者共用同一份数据。AI（DeepSeek）作为画布上的协作画师，产出以「虚线幽灵节点」的形式出现，确认才落库。
 
+<img width="1900" height="899" alt="image" src="https://github.com/user-attachments/assets/5872a699-7dc3-4728-b7d0-d485f5b3746f" />
+
 ## 特性
 
 **画布（主入口）**
