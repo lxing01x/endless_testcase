@@ -1,81 +1,75 @@
-endless_testcase Personal Non-Commercial License v1.0
-个人非商业许可协议 v1.0
+# PolyForm Noncommercial License 1.0.0
 
-Copyright (c) 2026 lxing01x
-Project: endless_testcase
-Repository: https://github.com/lxing01x/endless_testcase
+Required Notice: Copyright lxing01x (https://github.com/lxing01x/endless_testcase)
 
-保留所有权利。凡复制、修改、分发或以任何方式使用本软件及其衍生作品，即视为同意以下全部条款。
+<https://polyformproject.org/licenses/noncommercial/1.0.0>
 
+## Acceptance
 
-一、个人使用许可（Grant of License）
+In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
 
-在遵守本协议的前提下，著作权人免费授予任何自然人一项非独占、不可转让、可撤销的许可，允许其出于个人学习、研究、教学、个人非商业项目等非商业目的：
+## Copyright License
 
-1. 使用本软件；
-2. 复制、修改本软件，并基于本软件创作衍生作品；
-3. 在非商业前提下分发本软件或其衍生作品（须同时满足第四条）。
+The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose. However, you may only distribute the software according to [Distribution License](#distribution-license) and make changes or new works based on the software according to [Changes and New Works License](#changes-and-new-works-license).
 
+## Distribution License
 
-二、禁止商业使用（Non-Commercial Restriction）
+The licensor grants you an additional copyright license to distribute copies of the software. Your license to distribute covers distributing the software with changes and new works permitted by [Changes and New Works License](#changes-and-new-works-license).
 
-未经著作权人事先书面授权，不得将本软件及其任何修改版、衍生版用于任何商业目的，包括但不限于：
+## Notices
 
-1. 销售、出租、许可收费，或将其打包进任何付费产品、付费服务；
-2. 作为软件即服务（SaaS）、云服务、托管服务向第三方提供；
-3. 在企业、机构或其他组织的生产经营、业务运营、内部管理系统中部署或使用（含仅供内部员工使用的情形）；
-4. 用于商业咨询、外包交付、客户项目交付或商业培训；
-5. 以本软件为基础提供有偿的技术支持、定制开发或运维服务。
+You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL for them above, as well as copies of any plain-text lines beginning with `Required Notice:` that the licensor provided with the software. For example:
 
-判断标准以"是否具有商业利益或商业用途"为准，而非是否直接收费。如需商用，请联系著作权人取得书面许可。
+> Required Notice: Copyright Yoyodyne, Inc. (http://example.com)
 
+## Changes and New Works License
 
-三、引用与署名（Attribution）
+The licensor grants you an additional copyright license to make changes and new works based on the software for any permitted purpose.
 
-在论文、文章、教程、视频、演示、开源项目或其他任何公开场合引用本软件，或基于本软件进行二次开发、分发衍生作品时，必须：
+## Patent License
 
-1. 明确标注来源，注明项目名称 `endless_testcase` 及仓库地址
-   https://github.com/lxing01x/endless_testcase ；
-2. 在源代码、文档或分发物中保留本许可文件及原始版权声明，不得删除或修改；
-3. 不得以任何方式暗示本软件作者为你的衍生作品背书。
+The licensor grants you a patent license for the software that covers patent claims the licensor can license, or becomes able to license, that you would infringe by using the software.
 
+## Noncommercial Purposes
 
-四、分发限制（Distribution）
+Any noncommercial purpose is a permitted purpose.
 
-1. 分发本软件或其衍生作品时，必须附带本协议完整文本；
-2. 不得将本软件或其衍生作品改为 MIT、Apache-2.0 等更宽松的许可，也不得附加与本协议冲突的条款；
-3. 分发衍生作品不得收取费用，除非仅收取必要的介质与传输成本。
+## Personal Uses
 
+Personal use for research, experiment, and testing for the benefit of public knowledge, personal study, private entertainment, hobby projects, amateur pursuits, or religious observance, without any anticipated commercial application, is use for a permitted purpose.
 
-五、免责声明（No Warranty）
+## Noncommercial Organizations
 
-本软件按"现状"（AS IS）提供，不附带任何明示或默示的担保，包括但不限于适销性、特定用途适用性与不侵权的担保。在任何情况下，著作权人均不对因使用或无法使用本软件而产生的任何直接、间接、偶然、特殊或后果性损害承担责任，即使已被告知该等损害的可能性。
+Use by any charitable organization, educational institution, public research organization, public safety or health organization, environmental protection organization, or government institution is use for a permitted purpose regardless of the source of funding or obligations resulting from the funding.
 
+## Fair Use
 
-六、许可终止（Termination）
+You may have "fair use" rights for the software under the law. These terms do not limit them.
 
-1. 违反本协议任一条款，本协议授予的全部权利立即自动终止，无需另行通知；
-2. 终止后应立即停止使用本软件，并删除或销毁所持有的全部副本及其衍生作品；
-3. 著作权人有权随时变更后续版本的许可条款，已发布的版本仍适用其发布时的条款。
+## No Other Rights
 
+These terms do not allow you to sublicense or transfer any of your licenses to anyone else, or prevent the licensor from granting licenses to anyone else. These terms do not imply any other licenses.
 
-七、其他（Miscellaneous）
+## Patent Defense
 
-1. 本协议未尽事宜，适用中华人民共和国法律；
-2. 本协议条款部分无效或不可执行的，不影响其余条款的效力；
-3. 本协议以中文版本为准。
+If you make any written claim that the software infringes or contributes to infringement of any patent, your patent license for the software granted under these terms ends immediately. If your company makes such a claim, your patent license ends immediately for work on behalf of your company.
 
+## Violations
 
----
+The first time you are notified in writing that you have violated any of these terms, or done anything with the software not covered by your licenses, your licenses can nonetheless continue if you come into full compliance with these terms, and take practical steps to correct past violations, within 32 days of receiving notice. Otherwise, all your licenses end immediately.
 
-English Summary (for reference only; the Chinese text above prevails)
+## No Liability
 
-endless_testcase is released under a personal, non-commercial license:
-you may use, modify and share it for personal, educational or research
-purposes free of charge. Commercial use of any kind — including internal
-business deployment, paid products or services, SaaS offerings, and client
-delivery — is prohibited without prior written permission from the author.
-Any public reference, republication or derivative work must credit the
-project name "endless_testcase" and link to
-https://github.com/lxing01x/endless_testcase, and must retain this license.
-The software is provided "AS IS", without warranty of any kind.
+***As far as the law allows, the software comes as is, without any warranty or condition, and the licensor will not be liable to you for any damages arising out of these terms or the use or nature of the software, under any kind of legal claim.***
+
+## Definitions
+
+The **licensor** is the individual or entity offering these terms, and the **software** is the software the licensor makes available under these terms.
+
+**You** refers to the individual or entity agreeing to these terms.
+
+**Your company** is any legal entity, sole proprietorship, or other kind of organization that you work for, plus all organizations that have control over, are under the control of, or are under common control with that organization. **Control** means ownership of substantially all the assets of an entity, or the power to direct its management and policies by vote, contract, or otherwise. Control can be direct or indirect.
+
+**Your licenses** are all the licenses granted to you for the software under these terms.
+
+**Use** means anything you do with the software requiring one of your licenses.
