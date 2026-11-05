@@ -250,13 +250,4 @@ Key 加密后存在 `data/.secret` 与 `data/db.json` 中，**只留在本机**�
 
 ## License
 
-本项目采用 **[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)**（SPDX：`PolyForm-Noncommercial-1.0.0`），一句话概括：**免费用，但不能拿来赚钱**。
-
-- ✅ 个人学习、研究、实验、爱好项目：可自由使用、修改、分发
-- ✅ 慈善机构、教育机构、公共研究机构、公共安全与卫生机构、环保组织、政府机构的使用
-- ❌ 任何商业用途都需另行取得授权：企业内部业务系统、付费产品或服务、SaaS 托管、外包与客户交付、有偿支持与定制
-- 📄 分发副本或衍生作品时，须附带本许可条款（或官方 URL）与 `Required Notice` 版权行
-
-完整条款见 [LICENSE](LICENSE)。需要商业授权请在仓库提 Issue 联系。
-
-Required Notice: Copyright lxing01x (https://github.com/lxing01x/endless_testcase)
+[MIT](LICENSE) © 2026 lxing01x
