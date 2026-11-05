@@ -274,6 +274,299 @@ app.post('/api/cases/batch', async (req) => {
   return ok({ created, updated, deleted: deletes })
 })
 
+/* ---------------- CSV 导入 ---------------- */
+
+/** 表头别名：中英文都认，方便从 Excel / 其他工具导出的表格直接用 */
+const IMPORT_FIELDS = {
+  scenario: ['场景', '所属场景', '分组', '模块', 'scenario', 'group', 'module'],
+  title: ['标题', '用例标题', '用例名称', '用例', 'title', 'name', 'case'],
+  priority: ['优先级', 'priority', 'prio'],
+  type: ['类型', '用例类型', 'type', 'kind'],
+  preconditions: ['前置条件', '前提条件', '前置', 'preconditions', 'precondition'],
+  steps: ['步骤', '操作步骤', '测试步骤', 'steps', 'step'],
+  expected: ['预期结果', '预期', '期望结果', 'expected', 'expectedresult', 'result'],
+  tags: ['标签', 'tags', 'tag'],
+  status: ['状态', 'status'],
+}
+
+const DEFAULT_IMPORT_COLS = [
+  'scenario',
+  'title',
+  'priority',
+  'type',
+  'preconditions',
+  'steps',
+  'expected',
+  'tags',
+  'status',
+]
+
+const HEADER_LOOKUP = new Map()
+for (const [field, aliases] of Object.entries(IMPORT_FIELDS)) {
+  for (const alias of aliases) {
+    HEADER_LOOKUP.set(alias.toLowerCase().replace(/[\s_:：-]/g, ''), field)
+  }
+}
+
+const STATUS_ALIAS = {
+  草稿: 'draft',
+  draft: 'draft',
+  待评审: 'reviewing',
+  评审中: 'reviewing',
+  reviewing: 'reviewing',
+  已通过: 'approved',
+  通过: 'approved',
+  approved: 'approved',
+  已废弃: 'deprecated',
+  废弃: 'deprecated',
+  deprecated: 'deprecated',
+}
+
+/** 手写 CSV 解析：支持双引号包裹、字段内换行与转义引号 */
+function parseCsv(text) {
+  const rows = []
+  let row = []
+  let field = ''
+  let quoted = false
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (quoted) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          field += '"'
+          i++
+        } else {
+          quoted = false
+        }
+      } else {
+        field += ch
+      }
+      continue
+    }
+    if (ch === '"') quoted = true
+    else if (ch === ',') {
+      row.push(field)
+      field = ''
+    } else if (ch === '\n') {
+      row.push(field)
+      rows.push(row)
+      row = []
+      field = ''
+    } else if (ch !== '\r') {
+      field += ch
+    }
+  }
+  if (field.length || row.length) {
+    row.push(field)
+    rows.push(row)
+  }
+  return rows.filter((r) => r.some((cell) => String(cell).trim() !== ''))
+}
+
+function parseSteps(raw) {
+  return String(raw || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => ({ action: line.replace(/^\s*(?:\d+[.、)）]|[-*·])\s*/, '') }))
+    .filter((s) => s.action)
+}
+
+function parseImportRows(csv) {
+  const rows = parseCsv(String(csv || '').replace(/^\uFEFF/, ''))
+  if (!rows.length) return { items: [], hasHeader: false }
+
+  const header = rows[0].map(
+    (cell) => HEADER_LOOKUP.get(String(cell).toLowerCase().replace(/[\s_:：-]/g, '')) || null,
+  )
+  // 至少命中两列才认为是表头，否则按固定列序（与导出格式一致）解析
+  const hasHeader = header.filter(Boolean).length >= 2
+  const cols = hasHeader ? header : DEFAULT_IMPORT_COLS
+  const body = hasHeader ? rows.slice(1) : rows
+
+  const items = []
+  for (const r of body) {
+    const rec = {}
+    cols.forEach((key, i) => {
+      if (key && rec[key] === undefined) rec[key] = String(r[i] ?? '').trim()
+    })
+    if (!rec.title) continue
+    const priority = String(rec.priority || '').toUpperCase()
+    items.push({
+      scenario: rec.scenario || '',
+      title: rec.title.trim(),
+      priority: ['P0', 'P1', 'P2', 'P3'].includes(priority) ? priority : 'P2',
+      type: rec.type || '功能',
+      preconditions: rec.preconditions || '',
+      steps: parseSteps(rec.steps),
+      expected: rec.expected || '',
+      tags: String(rec.tags || '')
+        .split(/[,，;；、]/)
+        .map((t) => t.trim())
+        .filter(Boolean),
+      status: STATUS_ALIAS[String(rec.status || '').toLowerCase()] || STATUS_ALIAS[String(rec.status || '')] || 'draft',
+    })
+  }
+  return { items, hasHeader }
+}
+
+app.post('/api/suites/:id/import', async (req) => {
+  const suite = findSuite(req.params.id)
+  if (!suite) return { ok: false, error: '用例集不存在' }
+  const { csv = '', mode = 'merge', dryRun = false } = req.body || {}
+  const { items, hasHeader } = parseImportRows(csv)
+  if (!items.length) {
+    return { ok: false, error: '没有解析到用例：请确认表格里有「标题」列，且不是空文件' }
+  }
+
+  const canvas = findCanvasBySuite(suite.id)
+  if (!canvas) return { ok: false, error: '画布不存在' }
+
+  const replace = mode === 'replace'
+  const scenarioLabel = new Map()
+  for (const node of canvas.nodes) {
+    if (node.type === 'scenario') scenarioLabel.set(node.id, String(node.data?.label || '').trim())
+  }
+  const scenarioIdByLabel = new Map()
+  for (const [id, label] of scenarioLabel) if (!scenarioIdByLabel.has(label)) scenarioIdByLabel.set(label, id)
+
+  const keyOf = (label, title) => `${label.trim().toLowerCase()}::${title.trim().toLowerCase()}`
+  const existing = casesOfSuite(suite.id)
+  const index = new Map()
+  if (!replace) {
+    for (const c of existing) index.set(keyOf(scenarioLabel.get(c.groupId) || '', c.title), c)
+  }
+
+  const plan = []
+  const seenKeys = new Set()
+  let skipped = 0
+  for (const item of items) {
+    const key = keyOf(item.scenario, item.title)
+    if (seenKeys.has(key)) {
+      skipped++
+      continue
+    }
+    seenKeys.add(key)
+    plan.push({ item, target: index.get(key) || null })
+  }
+
+  const toCreate = plan.filter((p) => !p.target)
+  const newLabels = [...new Set(toCreate.map((p) => p.item.scenario).filter(Boolean))].filter(
+    (label) => !scenarioIdByLabel.has(label),
+  )
+
+  const stats = {
+    created: toCreate.length,
+    updated: plan.length - toCreate.length,
+    skipped,
+    scenarios: newLabels.length,
+    removed: replace ? existing.length : 0,
+    total: plan.length,
+  }
+  const preview = plan.slice(0, 8).map((p) => ({
+    title: p.item.title,
+    scenario: p.item.scenario || '未分组',
+    priority: p.item.priority,
+    steps: p.item.steps.length,
+    action: p.target ? 'update' : 'create',
+  }))
+
+  if (dryRun) return ok({ stats, preview, hasHeader })
+
+  if (replace) {
+    const drop = new Set(existing.map((c) => c.id))
+    db.cases = db.cases.filter((c) => !drop.has(c.id))
+    canvas.nodes = canvas.nodes.filter((n) => !(n.data?.caseId && drop.has(n.data.caseId)))
+    const alive = new Set(canvas.nodes.map((n) => n.id))
+    canvas.edges = canvas.edges.filter((e) => alive.has(e.source) && alive.has(e.target))
+  }
+
+  let order = casesOfSuite(suite.id).length
+  for (const p of plan) {
+    if (!p.target) continue
+    Object.assign(p.target, {
+      priority: p.item.priority,
+      type: p.item.type,
+      preconditions: p.item.preconditions,
+      steps: p.item.steps,
+      expected: p.item.expected,
+      tags: p.item.tags,
+      status: p.item.status,
+      updatedAt: now(),
+    })
+  }
+
+  // 新用例按场景分列排布，接在现有内容下方，不覆盖已有节点
+  let baseY = 80
+  let maxY = 0
+  for (const node of canvas.nodes) {
+    maxY = Math.max(maxY, node.position.y + (node.type === 'case' ? 120 : 84))
+  }
+  if (canvas.nodes.length) baseY = maxY + 110
+  const baseX = 80
+
+  const groups = new Map()
+  for (const p of toCreate) {
+    const label = p.item.scenario
+    if (!groups.has(label)) groups.set(label, [])
+    groups.get(label).push(p)
+  }
+
+  let col = 0
+  for (const [label, group] of groups) {
+    const x = baseX + col * 300
+    let scenarioId = label ? scenarioIdByLabel.get(label) || null : null
+    if (label && !scenarioId) {
+      const node = {
+        id: uid('n_'),
+        type: 'scenario',
+        position: { x, y: baseY },
+        data: { label, accent: 'violet' },
+      }
+      canvas.nodes.push(node)
+      scenarioId = node.id
+      scenarioIdByLabel.set(label, node.id)
+    }
+    const startY = label ? baseY + 84 : baseY
+    group.forEach((p, i) => {
+      const created = {
+        id: uid('c_'),
+        suiteId: suite.id,
+        groupId: scenarioId,
+        title: p.item.title,
+        preconditions: p.item.preconditions,
+        steps: p.item.steps,
+        expected: p.item.expected,
+        priority: p.item.priority,
+        type: p.item.type,
+        tags: p.item.tags,
+        status: p.item.status,
+        order: order++,
+        aiMeta: null,
+        createdAt: now(),
+        updatedAt: now(),
+      }
+      db.cases.push(created)
+      const node = {
+        id: uid('n_'),
+        type: 'case',
+        position: { x, y: startY + i * 128 },
+        data: { caseId: created.id },
+      }
+      canvas.nodes.push(node)
+      if (scenarioId) {
+        canvas.edges.push({ id: uid('e_'), source: scenarioId, target: node.id, kind: 'contains' })
+      }
+    })
+    col++
+  }
+
+  canvas.updatedAt = now()
+  persist(true)
+  return ok({ stats, preview, hasHeader, cases: casesOfSuite(suite.id), canvas })
+})
+
 app.put('/api/canvases/:id', async (req) => {
   const canvas = db.canvases.find((c) => c.id === req.params.id)
   if (!canvas) return { ok: false, error: '画布不存在' }

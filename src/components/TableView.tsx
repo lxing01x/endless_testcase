@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Plus, Trash2, Sparkles, Download } from 'lucide-react'
+import { Plus, Trash2, Sparkles, Download, Upload } from 'lucide-react'
 import { useStore } from '../store'
+import ImportModal from './ImportModal'
 import type { Priority } from '../types'
 
 export default function TableView() {
@@ -15,6 +16,7 @@ export default function TableView() {
   const setAiOpen = useStore((s) => s.setAiOpen)
   const suite = useStore((s) => s.suite)
   const [prio, setPrio] = useState<string>('all')
+  const [importOpen, setImportOpen] = useState(false)
 
   const scenarios = useMemo(
     () => (canvas?.nodes || []).filter((n) => n.type === 'scenario'),
@@ -56,6 +58,9 @@ export default function TableView() {
             </button>
           ))}
         </div>
+        <button className="primary-btn ghost" onClick={() => setImportOpen(true)}>
+          <Upload size={14} /> 导入
+        </button>
         <button
           className="primary-btn ghost"
           onClick={() => {
@@ -204,6 +209,7 @@ export default function TableView() {
           </table>
         )}
       </div>
+      {importOpen && <ImportModal onClose={() => setImportOpen(false)} />}
       {void scenarioName}
     </div>
   )

@@ -1,4 +1,12 @@
-import type { AiConfig, CanvasState, CaseRecord, Project, Suite } from './types'
+import type {
+  AiConfig,
+  CanvasState,
+  CaseRecord,
+  ImportPreviewRow,
+  ImportStats,
+  Project,
+  Suite,
+} from './types'
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -41,6 +49,21 @@ export const api = {
 
   syncSuite: (id: string, payload: { cases: CaseRecord[]; nodes: any[]; edges: any[] }) =>
     request(`/api/suites/${id}/sync`, { method: 'POST', body: JSON.stringify(payload) }),
+
+  importCsv: (
+    suiteId: string,
+    payload: { csv: string; mode?: 'merge' | 'replace'; dryRun?: boolean },
+  ) =>
+    request<{
+      stats: ImportStats
+      preview: ImportPreviewRow[]
+      hasHeader: boolean
+      cases?: CaseRecord[]
+      canvas?: CanvasState
+    }>(`/api/suites/${suiteId}/import`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 
   getAiSettings: () => request<AiConfig>('/api/settings/ai'),
   saveAiSettings: (payload: {

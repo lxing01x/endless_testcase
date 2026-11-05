@@ -111,6 +111,59 @@ const run = async () => {
   const md = await resMd.text()
   check('导出 Markdown', resMd.ok && md.includes('## AI 场景'))
 
+  const importCsv = [
+    '场景,标题,优先级,类型,前置条件,步骤,预期结果,标签,状态',
+    '导入场景,导入用例甲,P0,功能,,"1. 打开页面\n2. 点击按钮",显示成功,"导入,冒烟",评审中',
+    '导入场景,导入用例乙,P2,功能,,1. 输入内容,保存成功,导入,草稿',
+    '导入场景,导入用例甲,P0,功能,,表内重复行应被跳过,,,草稿',
+  ].join('\n')
+
+  const dry = await call('POST', `/api/suites/${suite.id}/import`, { csv: importCsv, dryRun: true })
+  check(
+    '导入预览：2 条新增 + 1 条表内重复',
+    dry.stats.created === 2 && dry.stats.skipped === 1,
+    JSON.stringify(dry.stats),
+  )
+
+  const imported = await call('POST', `/api/suites/${suite.id}/import`, {
+    csv: importCsv,
+    mode: 'merge',
+  })
+  check('导入落库：新增 2 条', imported.stats.created === 2, JSON.stringify(imported.stats))
+  check(
+    '导入自动建场景节点并连线',
+    imported.canvas.nodes.some((n) => n.type === 'scenario' && n.data.label === '导入场景') &&
+      imported.canvas.edges.length > 0,
+  )
+  const importedCase = imported.cases.find((c) => c.title === '导入用例甲')
+  check(
+    '导入字段解析：步骤 / 标签 / 状态',
+    importedCase.steps.length === 2 &&
+      importedCase.tags.includes('冒烟') &&
+      importedCase.status === 'reviewing',
+    JSON.stringify(importedCase).slice(0, 140),
+  )
+
+  const again = await call('POST', `/api/suites/${suite.id}/import`, {
+    csv: importCsv,
+    mode: 'merge',
+  })
+  check(
+    '重复导入按标题去重，只更新不新增',
+    again.stats.created === 0 && again.stats.updated === 2,
+    JSON.stringify(again.stats),
+  )
+
+  const replaced = await call('POST', `/api/suites/${suite.id}/import`, {
+    csv: importCsv,
+    mode: 'replace',
+  })
+  check(
+    '覆盖导入：先清空再写入',
+    replaced.cases.length === 2 && replaced.stats.removed === imported.cases.length,
+    JSON.stringify(replaced.stats),
+  )
+
   await call('POST', `/api/suites/${suite.id}/sync`, {
     cases: [{ ...created, title: '同步后的标题' }],
     nodes: [{ id: 'n_only', type: 'note', position: { x: 0, y: 0 }, data: { text: 'hi' } }],

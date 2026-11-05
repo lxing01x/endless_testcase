@@ -4,7 +4,7 @@
 
 一个单机运行的测试用例编写平台：画布负责发散与推演，表格负责规范与交付，两者共用同一份数据。AI（DeepSeek）作为画布上的协作画师，产出以「虚线幽灵节点」的形式出现，确认才落库。
 
-<img width="1900" height="899" alt="image" src="https://github.com/user-attachments/assets/5872a699-7dc3-4728-b7d0-d485f5b3746f" />
+<img width="1900" height="899" alt="无限画布" src="https://github.com/user-attachments/assets/5872a699-7dc3-4728-b7d0-d485f5b3746f" />
 
 ## 特性
 
@@ -17,6 +17,7 @@
 **表格**
 - 行内编辑（标题/优先级/类型/预期/状态）、场景归属下拉、优先级筛选
 - 批量新建、删除，搜索（标题/标签/预期）
+- **导入 CSV**：拖文件或直接粘贴，先试算再落库；按「场景 + 标题」去重，命中即更新，也支持覆盖导入
 - 导出 CSV（Excel 可直接打开）、Markdown
 
 **双视图同源**
@@ -29,6 +30,18 @@
 - SSE 流式输出，结果先以幽灵节点铺在画布右侧，可逐条勾选采纳
 - 采纳后作为一个整体可撤销；未配置 Key 时给明确引导
 - Key 使用 AES-256-GCM 加密存于本机，永不下发浏览器
+
+## 界面
+
+画布与表格是同一份用例的两种读法：左边画出来，右边改起来。
+
+| 表格 · 行内编辑 | 导入 CSV · 先试算再落库 |
+|---|---|
+| ![表格视图](docs/images/table.png) | ![导入面板](docs/images/import.png) |
+
+浅色「雾光」主题：
+
+![浅色主题](docs/images/canvas-light.png)
 
 ## 视觉与主题
 
@@ -132,6 +145,7 @@ POST   /api/cases/batch                 （批量创建/更新/删除）
 PUT    /api/canvases/:id                （布局与连线）
 POST   /api/suites/:id/sync             （撤销时整体回放）
 GET    /api/suites/:id/export?format=md|csv
+POST   /api/suites/:id/import           （CSV 导入，dryRun=true 只预览不落库）
 GET/PUT /api/settings/ai                POST /api/settings/ai/test
 POST   /api/ai/generate                 （SSE）
 POST   /api/ai/adopt                    （create / update）
@@ -141,7 +155,7 @@ POST   /api/ai/adopt                    （create / update）
 
 - 单机单用户，无鉴权与多租户；多人协同需要引入 CRDT（P2）
 - 只写用例，不执行用例（执行与结果回填在路线图上）
-- 导入仅支持 CSV 导出后的回填；Excel/XMind 导入待做
+- 导入覆盖 CSV（推荐用 Excel「另存为 → CSV UTF-8」）；.xlsx / XMind 原生格式待做
 - AI 仅适配 DeepSeek，多模型抽象层留到后续
 
 更完整的取舍与路线见 [`docs/设计方案.md`](docs/设计方案.md)。

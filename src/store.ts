@@ -8,6 +8,7 @@ import type {
   CanvasNode,
   CanvasState,
   CaseRecord,
+  ImportStats,
   PatchItem,
   PendingPatch,
   Project,
@@ -93,6 +94,7 @@ interface AppState {
   addChild: () => Promise<void>
   updateCase: (id: string, patch: Partial<CaseRecord>) => void
   deleteCases: (ids: string[]) => Promise<void>
+  importCases: (csv: string, mode?: 'merge' | 'replace') => Promise<ImportStats | null>
   deleteNodes: (ids: string[]) => Promise<void>
   updateNodeData: (id: string, patch: Record<string, any>) => void
   applyNodeChanges: (changes: any[]) => void
@@ -439,6 +441,37 @@ export const useStore = create<AppState>((set, get) => ({
     await api.batchCases({ deletes: ids })
     get().saveCanvasNow()
     get().showToast({ text: `已删除 ${ids.length} 条用例` })
+  },
+
+  async importCases(csv, mode = 'merge') {
+    const { suite, canvas, cases } = get()
+    if (!suite || !canvas) return null
+    // 先留快照，但只在导入成功后入栈，避免失败时脏了撤销栈
+    const snapshot: Snapshot = JSON.parse(
+      JSON.stringify({ cases, nodes: canvas.nodes, edges: canvas.edges }),
+    )
+    const res = await api.importCsv(suite.id, { csv, mode })
+    const past = get().past
+    set({
+      cases: res.cases || cases,
+      canvas: res.canvas || canvas,
+      past: [...past.slice(-39), snapshot],
+      future: [],
+      selectedNodeId: null,
+      selectedCaseId: null,
+    })
+    const s = res.stats
+    const parts = [
+      s.created ? `新增 ${s.created} 条` : '',
+      s.updated ? `更新 ${s.updated} 条` : '',
+      s.scenarios ? `新建 ${s.scenarios} 个场景` : '',
+    ].filter(Boolean)
+    get().showToast({
+      text: `导入完成：${parts.join('，') || '没有变化'}`,
+      actionLabel: '撤销',
+      action: () => get().undo(),
+    })
+    return s
   },
 
   async deleteNodes(ids) {

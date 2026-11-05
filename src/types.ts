@@ -117,3 +117,20 @@ export interface PendingPatch {
   targetCaseId?: string
   createdAt: number
 }
+
+export interface ImportStats {
+  created: number
+  updated: number
+  skipped: number
+  scenarios: number
+  removed: number
+  total: number
+}
+
+export interface ImportPreviewRow {
+  title: string
+  scenario: string
+  priority: string
+  steps: number
+  action: 'create' | 'update'
+}
