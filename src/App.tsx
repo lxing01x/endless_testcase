@@ -20,7 +20,7 @@ function Welcome() {
   return (
     <div className="welcome">
       <div className="welcome-inner">
-        <span className="kicker">endless_testcase · 单机模式</span>
+        <span className="kicker">用例星图 · 单机模式</span>
         <h1>
           用一张画布，
           <br />

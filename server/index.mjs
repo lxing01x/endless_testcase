@@ -809,5 +809,5 @@ if (fs.existsSync(distDir)) {
 
 const PORT = Number(process.env.PORT || 8787)
 app.listen({ port: PORT, host: '127.0.0.1' }).then(() => {
-  console.log(`[endless_testcase] api ready → http://127.0.0.1:${PORT}`)
+  console.log(`[用例星图] api ready → http://127.0.0.1:${PORT}`)
 })

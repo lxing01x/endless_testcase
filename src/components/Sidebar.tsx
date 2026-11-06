@@ -41,9 +41,9 @@ export default function Sidebar({ onHelp }: { onHelp: () => void }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">∞</div>
+        <div className="brand-mark">✦</div>
         <div>
-          <div className="brand-name">endless_testcase</div>
+          <div className="brand-name">用例星图</div>
           <div className="brand-sub">无限画布用例设计</div>
         </div>
       </div>

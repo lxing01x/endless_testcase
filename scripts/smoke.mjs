@@ -24,7 +24,7 @@ function check(name, cond, extra = '') {
 }
 
 const run = async () => {
-  console.log('\nendless_testcase smoke test\n')
+  console.log('\n用例星图 API smoke test\n')
 
   const { project, suite } = await call('POST', '/api/projects', {
     name: '__smoke__',

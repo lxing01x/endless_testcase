@@ -1,5 +1,5 @@
 /* ============================================================
-   endless_testcase — Deep Space Lab
+   用例星图 CaseAtlas — Deep Space Lab
    极光渐变 · 玻璃面板 · 霓虹节点
    深色 = 深空台面（默认）· 浅色 = 雾光白纸
    ============================================================ */
@@ -424,10 +424,10 @@ kbd {
 }
 
 .brand-name {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-family: var(--font-sans);
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
   line-height: 1.3;
   color: var(--text);
 }

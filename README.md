@@ -1,4 +1,4 @@
-# endless_testcase
+# 用例星图 (CaseAtlas)
 
 > 用无限画布「想」用例，用结构化表格「管」用例。
 
